@@ -22,7 +22,7 @@ function App() {
               <div className="content__items">
                 {
                   pizzes.map((obj) => 
-                  (<PizzaBlock {...obj}/>)) 
+                  (<PizzaBlock key={} {...obj}/>)) 
                 }
               </div>
             </div>
