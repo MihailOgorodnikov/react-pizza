@@ -1,7 +1,23 @@
+import React from "react";
+
 function Sort() {
+  //сама маленькая менюшка открытие закрытие 
+  const [open, setOpen] = React.useState(false);
+  //Чтобы при клике она внутри активна была
+  const [selected, setSelected] = React.useState(0);
+  //То что внутри менюшки
+  const list = ['популярности', 'цене', 'алфавиту'];
+
+  const sortName = list[selected];
+
+  const onClickListItem = (i) => {
+    setSelected(i);
+    setOpen(false);
+  }
+
     return(
       <div className="sort">
-                    <div className="sort__label">
+        <div className="sort__label">
                       <svg
                         width="10"
                         height="6"
@@ -15,16 +31,16 @@ function Sort() {
                         />
                       </svg>
                       <b>Сортировка по:</b>
-                      <span>популярности</span>
-                    </div>
-                    <div className="sort__popup">
-                      <ul>
-                        <li className="active">популярности</li>
-                        <li>цене</li>
-                        <li>алфавиту</li>
-                      </ul>
-                    </div>
-                  </div>
+                      <span onClick={() => setOpen(!open)}>{sortName}</span>
+        </div>
+        {open && (<div className="sort__popup">
+          <ul>
+            {
+              list.map((name, i) => (<li key={i} onClick={() => onClickListItem(i)} className={selected == i ? "active" : ''}>{name}</li>))
+            }
+          </ul>
+        </div>)}
+      </div>
     )
   }
 
