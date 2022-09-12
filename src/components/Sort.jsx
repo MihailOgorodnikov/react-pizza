@@ -8,6 +8,7 @@ function Sort() {
   //То что внутри менюшки
   const list = ['популярности', 'цене', 'алфавиту'];
 
+  //Переменная которая в себе хронит то что мы нажали
   const sortName = list[selected];
 
   const onClickListItem = (i) => {
