@@ -1,18 +1,19 @@
 import React from "react";
 
-function Sort() {
+function Sort({ value, onClickSort}) {
   //сама маленькая менюшка открытие закрытие 
   const [open, setOpen] = React.useState(false);
-  //Чтобы при клике она внутри активна была
-  const [selected, setSelected] = React.useState(0);
   //То что внутри менюшки
-  const list = ['популярности', 'цене', 'алфавиту'];
-
-  //Переменная которая в себе хронит то что мы нажали
-  const sortName = list[selected];
+  const list = [{name: 'популярности (DESC)', sort: 'rating'},
+                {name: 'популярности (ASC)', sort: '-rating'},
+                {name: 'цене (DESC)', sort: 'price'},
+                {name: 'цене (ASC)', sort: '-price'},
+                {name: 'алфавиту (DESC)', sort: 'title'},
+                {name: 'алфавиту (ASC)', sort: '-title'} 
+              ];
 
   const onClickListItem = (i) => {
-    setSelected(i);
+    onClickSort(i);
     setOpen(false);
   }
 
@@ -32,12 +33,19 @@ function Sort() {
                         />
                       </svg>
                       <b>Сортировка по:</b>
-                      <span onClick={() => setOpen(!open)}>{sortName}</span>
+                      <span onClick={() => setOpen(!open)}>{value.name}</span>
         </div>
         {open && (<div className="sort__popup">
           <ul>
             {
-              list.map((name, i) => (<li key={i} onClick={() => onClickListItem(i)} className={selected == i ? "active" : ''}>{name}</li>))
+              list.map((obj, i) => (
+              <li 
+                  key={i} 
+                  onClick={() => onClickListItem(obj)} 
+                  className={value.sort == obj.sort ? "active" : ''}>
+                  {obj.name}
+              </li>
+              ))
             }
           </ul>
         </div>)}

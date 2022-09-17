@@ -1,9 +1,7 @@
 import React from "react";
 
-function Categories() {
+function Categories({ value, onClickCategory}) {
 
-  //Создание массива и  его состояния
-  const [activIndex, setActivIndex] = React.useState(0);
 
   //Массив категории  
   const categories = ['Все', 'Мясные', 'Вегетарианская', 'Гриль', 'Острые', 'Закрытые'];
@@ -12,7 +10,14 @@ function Categories() {
     return(
                    <div className="categories">
                     <ul>
-                      {categories.map((value, i) => (<li key={i} onClick={() => setActivIndex(i)} className={activIndex == i ? "active" : ''}>{value}</li>))}
+                      {categories.map((categoryName, i) => 
+                      (<li 
+                        key={i} 
+                        onClick={() => onClickCategory(i)} 
+                        className={value == i ? "active" : ''}>
+                          {categoryName}
+                        </li>
+                        ))}
                     </ul>
                   </div>
     )
