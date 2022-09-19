@@ -7,7 +7,7 @@ import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 
 
-const Home = () => {
+const Home = ({searchValue}) => {
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
@@ -28,17 +28,21 @@ const Home = () => {
       const category = categoryId > 0 ? `category=${categoryId}` : '';
       const sortBy = sortType.sort.replace('-', '');
       const order = sortType.sort.includes('-') ? 'asc' : 'desc';
+      const search = searchValue ? `&search=${searchValue}` : '';
 
         fetch(
-          `https://62f4d5e7ac59075124c4e906.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}`)
+          `https://62f4d5e7ac59075124c4e906.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}${search}`)
         .then((res) => res.json())
         .then((arr) => {
             setItems(arr);
             setIsLoading(false);
         });
         window.scrollTo(0, 0);
-    }, [categoryId, sortType]);
+    }, [categoryId, sortType, searchValue]);
 
+    //тут мы фильтруем массив когда что то написали в строку или просто выводи его 
+    const pizzes = items.map((obj) => (<PizzaBlock key={obj.id} {...obj}/>));
+    const sceletons = [...new Array(6)].map((_, index) => <Skeleton key={index}/>);
 
     return (
         <div className="container">
@@ -49,9 +53,7 @@ const Home = () => {
               <h2 className="content__title">Все пиццы</h2>
               <div className="content__items">
                 {
-                  isLoading ? [...new Array(6)].map((_, index) => <Skeleton key={index}/>)
-                   : items.map((obj) => 
-                  (<PizzaBlock key={obj.id} {...obj}/>)) 
+                  isLoading ? sceletons : pizzes 
                 }
               </div>
         </div>
