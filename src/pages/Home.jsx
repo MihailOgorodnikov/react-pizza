@@ -5,7 +5,7 @@ import Categories from '../components/Categories'
 import Sort from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
-
+import Pagination from '../components/Pagination';
 
 const Home = ({searchValue}) => {
     const [items, setItems] = React.useState([]);
@@ -13,6 +13,8 @@ const Home = ({searchValue}) => {
 
     //Стейты из категориес
     const [categoryId, setCategoryId] = React.useState(0);
+    //Для пагинации страницы
+    const [carrentPage, setCarrentPage] = React.useState(1);
     //Стейты из сортеровки
     const [sortType, setSortType] = React.useState({
       name: 'популярности',
@@ -31,14 +33,14 @@ const Home = ({searchValue}) => {
       const search = searchValue ? `&search=${searchValue}` : '';
 
         fetch(
-          `https://62f4d5e7ac59075124c4e906.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}${search}`)
+          `https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${carrentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
         .then((res) => res.json())
         .then((arr) => {
             setItems(arr);
             setIsLoading(false);
         });
         window.scrollTo(0, 0);
-    }, [categoryId, sortType, searchValue]);
+    }, [categoryId, sortType, searchValue, carrentPage]);
 
     //тут мы фильтруем массив когда что то написали в строку или просто выводи его 
     const pizzes = items.map((obj) => (<PizzaBlock key={obj.id} {...obj}/>));
@@ -56,6 +58,7 @@ const Home = ({searchValue}) => {
                   isLoading ? sceletons : pizzes 
                 }
               </div>
+            <Pagination onChangePage={(number) => setCarrentPage(number)}/>
         </div>
     );
 };
