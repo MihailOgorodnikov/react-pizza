@@ -1,9 +1,13 @@
 import React from "react";
+import { SearchContext } from "../../App";
 
 import styles from "./Search.moduls.scss";
 
 //строка поиска
-const Search = ({ searchValue, setSearchValue }) => {
+const Search = () => {
+    //Используем хук в котором переменная которая ссылается на контекст
+    const {searchValue, setSearchValue} = React.useContext(SearchContext);
+
     return (
         <div className="root">
             <svg 

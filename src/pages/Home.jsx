@@ -1,18 +1,28 @@
 import React from "react";
 
+import { useSelector, useDispatch } from 'react-redux';
 
+import { setCategoryId } from '../redux/slices/filterSlice';
 import Categories from '../components/Categories'
 import Sort from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Pagination from '../components/Pagination';
+import { SearchContext } from "../App";
 
-const Home = ({searchValue}) => {
+const Home = () => {
+  const dispatch = useDispatch();
+  const categoryId = useSelector(state => state.filter.categoryId);
+
+
+    //Используем хук в котором переменная которая ссылается на контекст
+    const {searchValue} = React.useContext(SearchContext);
+
     const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
     //Стейты из категориес
-    const [categoryId, setCategoryId] = React.useState(0);
+    //const [categoryId, setCategoryId] = React.useState(0);
     //Для пагинации страницы
     const [carrentPage, setCarrentPage] = React.useState(1);
     //Стейты из сортеровки
@@ -20,6 +30,11 @@ const Home = ({searchValue}) => {
       name: 'популярности',
       sort: 'rating'
     });
+
+
+    const onClickCategory = (id) => {
+      dispatch(setCategoryId(id));
+    };
     
     //&sortBy=${sortType.sort}&order=desc
     //https://62f4d5e7ac59075124c4e906.mockapi.io/items
@@ -49,7 +64,7 @@ const Home = ({searchValue}) => {
     return (
         <div className="container">
             <div className="content__top">
-                <Categories value={categoryId} onClickCategory={(i) => setCategoryId(i)}/>
+                <Categories value={categoryId} onClickCategory={onClickCategory}/>
                 <Sort value={sortType} onClickSort={(i) => setSortType(i)}/>
               </div>
               <h2 className="content__title">Все пиццы</h2>
