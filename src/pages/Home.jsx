@@ -1,18 +1,23 @@
 import React from "react";
 import axios from "axios";
+import qs from "qs";
+import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { setCategoryId, setCurrentPage } from '../redux/slices/filterSlice';
+import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
 import Categories from '../components/Categories'
-import Sort from '../components/Sort';
+import Sort, { list } from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Pagination from '../components/Pagination';
 import { SearchContext } from "../App";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const isSearch = React.useRef(false);
   const dispatch = useDispatch();
+  const isMounted = React.useRef(false);
   const {categoryId, sort, currentPage} = useSelector((state) => state.filter);
 
     //Используем хук в котором переменная которая ссылается на контекст
@@ -36,7 +41,8 @@ const Home = () => {
     //&sortBy=${sortType.sort}&order=desc
     //https://62f4d5e7ac59075124c4e906.mockapi.io/items
 
-    React.useEffect(() => {
+    //Юзефикт для выводы пицц и слежения за пораметрами
+    const fetchPizzas = () => {
       setIsLoading(true);
       
       const category = categoryId > 0 ? `category=${categoryId}` : '';
@@ -50,8 +56,45 @@ const Home = () => {
           setItems(res.data);
           setIsLoading(false);
         });
-        window.scrollTo(0, 0);
+    };
+
+    //Тут мы будем парсить значения в строку командную 
+    React.useEffect(() => {
+      if (isMounted.current) {
+        const queryString = qs.stringify({
+        sortProperti: sort.sortProperti,
+        categoryId,
+        currentPage,
+      });
+      navigate(`?${queryString}`);
+      }
+      isMounted.current = true;
+    }, [categoryId, sort.sortProperti, currentPage]);
+
+    //Парсим параметры со строки
+    React.useEffect(() => {
+      if(window.location.search){
+        const params = qs.parse(window.location.search.substring(1));
+        const sort = list.find((obj) => obj.sortProperti == params.sortProperti);
+
+        dispatch(
+          setFilters({
+            ...params,
+            sort,
+          })
+        );
+        isSearch.current = true;
+      }
+    }, []);
+
+    React.useEffect(() => {
+      window.scrollTo(0, 0);
+      if(!isSearch.current){
+        fetchPizzas();
+      }
+      isSearch.current = false;
     }, [categoryId, sort.sortProperti, searchValue, currentPage]);
+
 
     //тут мы фильтруем массив когда что то написали в строку или просто выводи его 
     const pizzes = items.map((obj) => (<PizzaBlock key={obj.id} {...obj}/>));
