@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
 import Categories from '../components/Categories'
-import Sort, { list } from '../components/Sort';
+import Sort, { sortList } from '../components/Sort';
 import PizzaBlock from '../components/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Pagination from '../components/Pagination';
@@ -66,7 +66,7 @@ const Home = () => {
         categoryId,
         currentPage,
       });
-      navigate(`?${queryString}`);
+      //navigate(`?${queryString}`);
       }
       isMounted.current = true;
     }, [categoryId, sort.sortProperti, currentPage]);
@@ -75,7 +75,8 @@ const Home = () => {
     React.useEffect(() => {
       if(window.location.search){
         const params = qs.parse(window.location.search.substring(1));
-        const sort = list.find((obj) => obj.sortProperti == params.sortProperti);
+
+        const sort = sortList.find((obj) => obj.sortProperti === params.sortProperti);
 
         dispatch(
           setFilters({

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSort } from '../redux/slices/filterSlice';
 
 //То что внутри менюшки
-export const list = [
+export const sortList = [
     {name: 'популярности (DESC)', sortProperti: 'rating'},
     {name: 'популярности (ASC)', sortProperti: '-rating'},
     {name: 'цене (DESC)', sortProperti: 'price'},
@@ -17,6 +17,8 @@ function Sort() {
   const dispatch = useDispatch();
   const sort = useSelector(state => state.filter.sort);
 
+  const sortRef = React.useRef();
+
 
   //сама маленькая менюшка открытие закрытие 
   const [open, setOpen] = React.useState(false);
@@ -24,10 +26,25 @@ function Sort() {
   const onClickListItem = (obj) => {
     dispatch(setSort(obj));
     setOpen(false);
-  }
+  };
+
+  //убирает окошко сартировки и обработчик который мы повесели на весь документ
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.path.includes(sortRef.current)){
+        setOpen(false);
+      }
+    };
+
+    document.body.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.body.removeEventListener('click', handleClickOutside);
+    }
+  }, []);
 
     return(
-      <div className="sort">
+      <div ref={sortRef} className="sort">
         <div className="sort__label">
                       <svg
                         width="10"
@@ -47,7 +64,7 @@ function Sort() {
         {open && (<div className="sort__popup">
           <ul>
             {
-              list.map((obj, i) => (
+              sortList.map((obj, i) => (
               <li 
                   key={i} 
                   onClick={() => onClickListItem(obj)} 
