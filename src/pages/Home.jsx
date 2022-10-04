@@ -3,7 +3,7 @@ import axios from "axios";
 import qs from "qs";
 import { useNavigate } from "react-router-dom";
 
-import { setItems } from "../redux/slices/pizzasSlice";
+import { fetchPizzas } from "../redux/slices/pizzasSlice";
 
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -17,20 +17,16 @@ import { SearchContext } from "../App";
 
 const Home = () => {
   const navigate = useNavigate();
-  const isSearch = React.useRef(false);
   const dispatch = useDispatch();
+  const isSearch = React.useRef(false);
   const isMounted = React.useRef(false);
-  const items = useSelector((state) => state.pizza.items);
+
+
+  const {items, status} = useSelector((state) => state.pizza);
   const {categoryId, sort, currentPage} = useSelector((state) => state.filter);
 
     //Используем хук в котором переменная которая ссылается на контекст
     const {searchValue} = React.useContext(SearchContext);
-
-    //const [items, setItems] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-
-    //Для пагинации страницы
-    //const [carrentPage, setCarrentPage] = React.useState(1);
 
 
     const onClickCategory = (id) => {
@@ -41,49 +37,50 @@ const Home = () => {
       dispatch(setCurrentPage(number));
       
     };
-    //&sortBy=${sortType.sort}&order=desc
-    //https://62f4d5e7ac59075124c4e906.mockapi.io/items
+
 
     //Юзефикт для выводы пицц и слежения за пораметрами
-    const fetchPizzas = async () => {
-      setIsLoading(true);
-      
+    const getPizzas = async () => {
       const category = categoryId > 0 ? `category=${categoryId}` : '';
       const sortBy = sort.sortProperti.replace('-', '');
       const order = sort.sortProperti.includes('-') ? 'asc' : 'desc';
       const search = searchValue ? `&search=${searchValue}` : '';
 
-
-       // await axios.get(`https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
-       // .then((res) => {
-       //   setItems(res.data);
-       //   setIsLoading(false);
-       //});
-
-       try {
-         const { data } = await axios.get(`https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`);
-         dispatch(setItems(data));
-       }catch (error) {
-         alert('ошибка при получении пицц');
-       }finally{
-         setIsLoading(false);
-       }
-
+         dispatch(
+           fetchPizzas({
+              category,
+              sortBy,
+              order,
+              search,
+              currentPage
+           })
+          );
+      
           window.scrollTo(0, 0);
     };
 
     //Тут мы будем парсить значения в строку командную 
     React.useEffect(() => {
       if (isMounted.current) {
-        const queryString = qs.stringify({
-        sortProperti: sort.sortProperti,
-        categoryId,
-        currentPage,
-      });
-      //navigate(`?${queryString}`);
+        const params = {
+          categoryId: categoryId > 0 ? categoryId : null,
+          sortProperti: sort.sortProperti,
+          currentPage,
+        };
+
+        const queryString = qs.stringify(params, {skipNulls: null});
+        navigate(`/?${queryString}`);
       }
-      isMounted.current = true;
-    }, [categoryId, sort.sortProperti, currentPage]);
+     
+      if (window.location.search){
+        fetchPizzas();
+      }
+    }, [categoryId, sort.sortProperti, searchValue, currentPage]);
+
+    React.useEffect(() => {
+      getPizzas();
+    }, [categoryId, sort.sortProperti, searchValue, currentPage]);
+  //categoryId, sort.sortProperti, searchValue, currentPage
 
     //Парсим параметры со строки
     React.useEffect(() => {
@@ -102,14 +99,6 @@ const Home = () => {
       }
     }, []);
 
-    React.useEffect(() => {
-      window.scrollTo(0, 0);
-      if(!isSearch.current){
-        fetchPizzas();
-      }
-      isSearch.current = false;
-    }, [categoryId, sort.sortProperti, searchValue, currentPage]);
-
 
     //тут мы фильтруем массив когда что то написали в строку или просто выводи его 
     const pizzes = items.map((obj) => (<PizzaBlock key={obj.id} {...obj}/>));
@@ -124,7 +113,7 @@ const Home = () => {
               <h2 className="content__title">Все пиццы</h2>
               <div className="content__items">
                 {
-                  isLoading ? sceletons : pizzes 
+                  status == 'loading' ? sceletons : pizzes 
                 }
               </div>
             <Pagination currentPage={currentPage} onChangePage={onChangePage}/>
