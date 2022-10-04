@@ -3,6 +3,8 @@ import axios from "axios";
 import qs from "qs";
 import { useNavigate } from "react-router-dom";
 
+import { setItems } from "../redux/slices/pizzasSlice";
+
 import { useSelector, useDispatch } from 'react-redux';
 
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
@@ -18,12 +20,13 @@ const Home = () => {
   const isSearch = React.useRef(false);
   const dispatch = useDispatch();
   const isMounted = React.useRef(false);
+  const items = useSelector((state) => state.pizza.items);
   const {categoryId, sort, currentPage} = useSelector((state) => state.filter);
 
     //Используем хук в котором переменная которая ссылается на контекст
     const {searchValue} = React.useContext(SearchContext);
 
-    const [items, setItems] = React.useState([]);
+    //const [items, setItems] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
     //Для пагинации страницы
@@ -42,7 +45,7 @@ const Home = () => {
     //https://62f4d5e7ac59075124c4e906.mockapi.io/items
 
     //Юзефикт для выводы пицц и слежения за пораметрами
-    const fetchPizzas = () => {
+    const fetchPizzas = async () => {
       setIsLoading(true);
       
       const category = categoryId > 0 ? `category=${categoryId}` : '';
@@ -51,11 +54,22 @@ const Home = () => {
       const search = searchValue ? `&search=${searchValue}` : '';
 
 
-        axios.get(`https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
-        .then((res) => {
-          setItems(res.data);
-          setIsLoading(false);
-        });
+       // await axios.get(`https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
+       // .then((res) => {
+       //   setItems(res.data);
+       //   setIsLoading(false);
+       //});
+
+       try {
+         const { data } = await axios.get(`https://62f4d5e7ac59075124c4e906.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`);
+         dispatch(setItems(data));
+       }catch (error) {
+         alert('ошибка при получении пицц');
+       }finally{
+         setIsLoading(false);
+       }
+
+          window.scrollTo(0, 0);
     };
 
     //Тут мы будем парсить значения в строку командную 
